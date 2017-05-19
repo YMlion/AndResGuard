@@ -1,6 +1,5 @@
 package com.tencent.mm.androlib;
 
-import apksigner.ApkSignerTool;
 import com.tencent.mm.resourceproguard.Configuration;
 import com.tencent.mm.util.FileOperation;
 import com.tencent.mm.util.TypedValue;
@@ -16,6 +15,8 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import apksigner.ApkSignerTool;
 
 /**
  * @author shwenzhang
@@ -102,7 +103,7 @@ public class ResourceApkBuilder {
         //首先一次性生成一个全部都是压缩的安装包
         generalRaw7zip();
 
-        ArrayList<String> storedFiles = new ArrayList<>();
+        ArrayList<String> storedFiles = new ArrayList<String>();
         //对于不压缩的要update回去
         for (String name : compressData.keySet()) {
             File file = new File(m7zipOutPutDir.getAbsolutePath(), name);
@@ -270,7 +271,7 @@ public class ResourceApkBuilder {
         }
 
         File[] unzipFiles = tempOutDir.listFiles();
-        List<File> collectFiles = new ArrayList<>();
+        List<File> collectFiles = new ArrayList<File>();
         for (File f : unzipFiles) {
             String name = f.getName();
             if (name.equals("res") || name.equals(config.mMetaName) || name.equals("resources.arsc")) {

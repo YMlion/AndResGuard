@@ -19,6 +19,7 @@ package apksigner;
 import com.android.apksig.ApkSigner;
 import com.android.apksig.ApkVerifier;
 import com.android.apksig.apk.MinSdkVersionException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,9 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -56,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+
 import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -99,7 +99,11 @@ public class ApkSignerTool {
                 throw new ParameterException(
                         "Unsupported command: " + cmd + ". See --help for supported commands");
             }
-        } catch (ParameterException | OptionsParser.OptionsException e) {
+        } catch (ParameterException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+            return;
+        } catch (OptionsParser.OptionsException e) {
             System.err.println(e.getMessage());
             System.exit(1);
             return;
@@ -120,7 +124,7 @@ public class ApkSignerTool {
         int minSdkVersion = 1;
         boolean minSdkVersionSpecified = false;
         int maxSdkVersion = Integer.MAX_VALUE;
-        List<SignerParams> signers = new ArrayList<>(1);
+        List<SignerParams> signers = new ArrayList<SignerParams>(1);
         SignerParams signerParams = new SignerParams();
         OptionsParser optionsParser = new OptionsParser(params);
         String optionName;
@@ -219,9 +223,10 @@ public class ApkSignerTool {
                             + ")");
         }
 
-        List<ApkSigner.SignerConfig> signerConfigs = new ArrayList<>(signers.size());
+        List<ApkSigner.SignerConfig> signerConfigs = new ArrayList<ApkSigner.SignerConfig>(signers.size());
         int signerNumber = 0;
-        try (PasswordRetriever passwordRetriever = new PasswordRetriever()) {
+        PasswordRetriever passwordRetriever = new PasswordRetriever();
+        try {
             for (SignerParams signer : signers) {
                 signerNumber++;
                 signer.name = "signer #" + signerNumber;
@@ -259,9 +264,11 @@ public class ApkSignerTool {
                 ApkSigner.SignerConfig signerConfig =
                         new ApkSigner.SignerConfig.Builder(
                                 v1SigBasename, signer.privateKey, signer.certs)
-                        .build();
+                                .build();
                 signerConfigs.add(signerConfig);
             }
+        } finally {
+            passwordRetriever.close();
         }
 
         if (outputApk == null) {
@@ -298,8 +305,14 @@ public class ApkSignerTool {
                     e);
         }
         if (!tmpOutputApk.getCanonicalPath().equals(outputApk.getCanonicalPath())) {
-            Files.move(
-                    tmpOutputApk.toPath(), outputApk.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            String outputPath = outputApk.getAbsolutePath();
+            if (outputApk.exists()) {
+                outputApk.delete();
+            }
+
+            tmpOutputApk.renameTo(new File(outputPath));
+//            Files.move(
+//                    tmpOutputApk.toPath(), outputApk.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
         if (verbose) {
@@ -517,14 +530,19 @@ public class ApkSignerTool {
     }
 
     private static void printUsage(String page) {
-        try (BufferedReader in =
-                new BufferedReader(
-                        new InputStreamReader(
-                                ApkSignerTool.class.getResourceAsStream(page),
-                                StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
+        try {
+            BufferedReader in =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    ApkSignerTool.class.getResourceAsStream(page),
+                                    Charset.forName("UTF-8")));
+            try {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } finally {
+                in.close();
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + page + " resource");
@@ -719,7 +737,7 @@ public class ApkSignerTool {
                 throw new ParameterException(
                         keystoreFile + " entry \"" + keyAlias + "\" does not contain certificates");
             }
-            this.certs = new ArrayList<>(certChain.length);
+            this.certs = new ArrayList<X509Certificate>(certChain.length);
             for (Certificate cert : certChain) {
                 this.certs.add((X509Certificate) cert);
             }
@@ -730,8 +748,11 @@ public class ApkSignerTool {
             Exception lastFailure = null;
             for (char[] password : passwords) {
                 try {
-                    try (FileInputStream in = new FileInputStream(file)) {
+                    FileInputStream in = new FileInputStream(file);
+                    try {
                         ks.load(in, password);
+                    } finally {
+                        in.close();
                     }
                     return;
                 } catch (Exception e) {
@@ -807,10 +828,13 @@ public class ApkSignerTool {
 
             // Load certificates
             Collection<? extends Certificate> certs;
-            try (FileInputStream in = new FileInputStream(certFile)) {
+            FileInputStream in = new FileInputStream(certFile);
+            try {
                 certs = CertificateFactory.getInstance("X.509").generateCertificates(in);
+            } finally {
+                in.close();
             }
-            List<X509Certificate> certList = new ArrayList<>(certs.size());
+            List<X509Certificate> certList = new ArrayList<X509Certificate>(certs.size());
             for (Certificate cert : certs) {
                 certList.add((X509Certificate) cert);
             }
@@ -864,8 +888,11 @@ public class ApkSignerTool {
 
     private static byte[] readFully(File file) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
-        try (FileInputStream in = new FileInputStream(file)) {
+        FileInputStream in = new FileInputStream(file);
+        try {
             drain(in, result);
+        } finally {
+            in.close();
         }
         return result.toByteArray();
     }

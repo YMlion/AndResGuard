@@ -26,5 +26,5 @@ allprojects {
 }
 
 ext {
-    javaVersion = JavaVersion.VERSION_1_7
+    javaVersion = JavaVersion.VERSION_1_6
 }

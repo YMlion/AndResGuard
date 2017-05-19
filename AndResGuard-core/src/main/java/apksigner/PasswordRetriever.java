@@ -28,7 +28,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ class PasswordRetriever implements AutoCloseable {
 
     private static final Charset CONSOLE_CHARSET = getConsoleEncoding();
 
-    private final Map<File, InputStream> mFileInputStreams = new HashMap<>();
+    private final Map<File, InputStream> mFileInputStreams = new HashMap<File, InputStream>();
 
     private boolean mClosed;
 
@@ -171,7 +170,7 @@ class PasswordRetriever implements AutoCloseable {
      * resulting list is guaranteed to contain at least one element.
      */
     private static List<char[]> getPasswords(char[] pwd) {
-        List<char[]> passwords = new ArrayList<>(3);
+        List<char[]> passwords = new ArrayList<char[]>(3);
         addPasswords(passwords, pwd);
         return passwords;
     }
@@ -184,7 +183,7 @@ class PasswordRetriever implements AutoCloseable {
      * @param encodings character encodings in which the password is encoded in {@code encodedPwd}.
      */
     private static List<char[]> getPasswords(byte[] encodedPwd, Charset... encodings) {
-        List<char[]> passwords = new ArrayList<>(4);
+        List<char[]> passwords = new ArrayList<char[]>(4);
 
         for (Charset encoding : encodings) {
             // Decode password and add it and its variants to the list
@@ -302,7 +301,7 @@ class PasswordRetriever implements AutoCloseable {
             // On Windows 10, cp65001 is the UTF-8 code page. For some reason, popular JVMs don't
             // have a mapping for cp65001...
             if ("cp65001".equals(consoleCharsetName)) {
-                return StandardCharsets.UTF_8;
+                return Charset.forName("UTF-8");
             }
             Charset defaultCharset = Charset.defaultCharset();
             System.err.println(

@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
@@ -153,7 +152,7 @@ public class FileOperation {
         checkDirectory(filePath);
         ZipFile zipFile = new ZipFile(fileName);
         Enumeration emu = zipFile.entries();
-        HashMap<String, Integer> compress = new HashMap<>();
+        HashMap<String, Integer> compress = new HashMap<String, Integer>();
         while (emu.hasMoreElements()) {
             ZipEntry entry = (ZipEntry) emu.nextElement();
             if (entry.isDirectory()) {

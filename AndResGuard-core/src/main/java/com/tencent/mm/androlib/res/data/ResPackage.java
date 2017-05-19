@@ -30,8 +30,8 @@ public class ResPackage {
 
     public ResPackage(int id, String name) {
         this.mName = name;
-        mSpecNamesReplace = new LinkedHashMap<>();
-        mSpecNamesBlock   = new HashSet<>();
+        mSpecNamesReplace = new LinkedHashMap<Integer, String>();
+        mSpecNamesBlock   = new HashSet<String>();
     }
 
     public boolean isCanProguard() {

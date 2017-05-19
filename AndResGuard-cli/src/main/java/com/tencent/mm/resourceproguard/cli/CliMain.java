@@ -186,7 +186,9 @@ public class CliMain extends Main {
                         repackage.setOutDir(outputFile);
                     }
                     repackage.repackageApk();
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 return;
@@ -217,7 +219,13 @@ public class CliMain extends Main {
                 mappingFile = null;
             }
             config = new Configuration(configFile, m7zipPath, mZipalignPath, mappingFile, signatureFile, keypass, storealias, storepass);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+            goToError();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            goToError();
+        } catch (SAXException e) {
             e.printStackTrace();
             goToError();
         }

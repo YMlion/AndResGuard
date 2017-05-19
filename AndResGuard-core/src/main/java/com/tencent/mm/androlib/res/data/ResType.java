@@ -30,7 +30,7 @@ public final class ResType {
     public ResType(String name, ResPackage package_) {
         this.mName = name;
         this.mPackage = package_;
-        specNames = new HashSet<>();
+        specNames = new HashSet<String>();
     }
 
     public String getName() {

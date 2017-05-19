@@ -61,7 +61,7 @@ public class ARSCDecoder {
     private static final Logger LOGGER             = Logger.getLogger(ARSCDecoder.class.getName());
     private static final int    KNOWN_CONFIG_BYTES = 56;
 
-    public static Map<Integer, String> mTableStringsProguard = new LinkedHashMap<>();
+    public static Map<Integer, String> mTableStringsProguard = new LinkedHashMap<Integer, String>();
 
     private ExtDataInput  mIn;
     private ExtDataOutput mOut;
@@ -89,18 +89,18 @@ public class ARSCDecoder {
 
 
     private ARSCDecoder(InputStream arscStream, ApkDecoder decoder) throws AndrolibException, IOException {
-        mOldFileName = new LinkedHashMap<>();
-        mCurSpecNameToPos = new LinkedHashMap<>();
-        mShouldProguardTypeSet = new HashSet<>();
+        mOldFileName = new LinkedHashMap<String, String>();
+        mCurSpecNameToPos = new LinkedHashMap<String, Integer>();
+        mShouldProguardTypeSet = new HashSet<String>();
         mIn = new ExtDataInput(new LEDataInputStream(arscStream));
         mApkDecoder = decoder;
         proguardFileName();
     }
 
     private ARSCDecoder(InputStream arscStream, ApkDecoder decoder, ResPackage[] pkgs) throws FileNotFoundException {
-        mOldFileName = new LinkedHashMap<>();
-        mCurSpecNameToPos = new LinkedHashMap<>();
-        mShouldProguardTypeSet = new HashSet<>();
+        mOldFileName = new LinkedHashMap<String, String>();
+        mCurSpecNameToPos = new LinkedHashMap<String, Integer>();
+        mShouldProguardTypeSet = new HashSet<String>();
         mApkDecoder = decoder;
         mIn = new ExtDataInput(new LEDataInputStream(arscStream));
         mOut = new ExtDataOutput(new LEDataOutputStream(new FileOutputStream(mApkDecoder.getOutTempARSCFile(), false)));
@@ -686,7 +686,7 @@ public class ARSCDecoder {
                     }
                     FileOperation.copyFileUsingStream(resRawFile, resDestFile);
                     //already copied
-                    mApkDecoder.removeCopiedResFile(resRawFile.toPath());
+                    mApkDecoder.removeCopiedResFile(resRawFile.getAbsolutePath());
                     mTableStringsProguard.put(data, result);
                 }
             }

@@ -57,7 +57,7 @@ public class RawARSCDecoder {
 
     private RawARSCDecoder(InputStream arscStream) throws AndrolibException, IOException {
         mIn = new ExtDataInput(new LEDataInputStream(arscStream));
-        mExistTypeNames = new HashMap<>();
+        mExistTypeNames = new HashMap<Integer, Set<String>>();
     }
 
     public static ResPackage[] decode(InputStream arscStream
@@ -331,7 +331,7 @@ public class RawARSCDecoder {
     private void putTypeSpecNameStrings(int type, String name) {
         Set<String> names = mExistTypeNames.get(type);
         if (names == null) {
-            names = new HashSet<>();
+            names = new HashSet<String>();
         }
         names.add(name);
         mExistTypeNames.put(type, names);

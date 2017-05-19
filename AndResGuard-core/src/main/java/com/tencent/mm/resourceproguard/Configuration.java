@@ -86,10 +86,10 @@ public class Configuration {
     public Configuration(File config, String sevenzipPath, String zipAlignPath, File mappingFile,
                          File signatureFile, String keypass, String storealias, String storepass)
             throws IOException, ParserConfigurationException, SAXException {
-        mWhiteList = new HashMap<>();
-        mOldResMapping = new HashMap<>();
-        mOldFileMapping = new HashMap<>();
-        mCompressPatterns = new HashSet<>();
+        mWhiteList = new HashMap<String, HashMap<String, HashSet<Pattern>>>();
+        mOldResMapping = new HashMap<String, HashMap<String, HashMap<String, String>>>();
+        mOldFileMapping = new HashMap<String, String>();
+        mCompressPatterns = new HashSet<Pattern>();
         if (signatureFile != null) {
             setSignData(signatureFile, keypass, storealias, storepass);
         }
@@ -108,10 +108,10 @@ public class Configuration {
      * @throws IOException io exception
      */
     public Configuration(InputParam param) throws IOException {
-        mWhiteList = new HashMap<>();
-        mOldResMapping = new HashMap<>();
-        mOldFileMapping = new HashMap<>();
-        mCompressPatterns = new HashSet<>();
+        mWhiteList = new HashMap<String, HashMap<String, HashSet<Pattern>>>();
+        mOldResMapping = new HashMap<String, HashMap<String, HashMap<String, String>>>();
+        mOldFileMapping = new HashMap<String, String>();
+        mCompressPatterns = new HashSet<Pattern>();
         if (param.useSign) {
             setSignData(param.signFile, param.keypass, param.storealias, param.storepass);
         }
@@ -267,14 +267,14 @@ public class Configuration {
         if (mWhiteList.containsKey(packageName)) {
             typeMap = mWhiteList.get(packageName);
         } else {
-            typeMap = new HashMap<>();
+            typeMap = new HashMap<String, HashSet<Pattern>>();
         }
 
         HashSet<Pattern> patterns;
         if (typeMap.containsKey(typeName)) {
             patterns = typeMap.get(typeName);
         } else {
-            patterns = new HashSet<>();
+            patterns = new HashSet<Pattern>();
         }
 
         name = Utils.convetToPatternString(name);
@@ -473,14 +473,14 @@ public class Configuration {
                             if (mOldResMapping.containsKey(packageName)) {
                                 typeMap = mOldResMapping.get(packageName);
                             } else {
-                                typeMap = new HashMap<>();
+                                typeMap = new HashMap<String, HashMap<String, String>>();
                             }
 
                             HashMap<String, String> namesMap;
                             if (typeMap.containsKey(typeName)) {
                                 namesMap = typeMap.get(typeName);
                             } else {
-                                namesMap = new HashMap<>();
+                                namesMap = new HashMap<String, String>();
                             }
                             namesMap.put(beforename, aftername);
 

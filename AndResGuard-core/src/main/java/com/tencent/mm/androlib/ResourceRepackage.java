@@ -87,7 +87,7 @@ public class ResourceRepackage {
         HashMap<String, Integer> compressData = FileOperation.unZipAPk(mSignedApk.getAbsolutePath(), m7zipOutPutDir.getAbsolutePath());
         //首先一次性生成一个全部都是压缩的安装包
         generalRaw7zip();
-        ArrayList<String> storedFiles = new ArrayList<>();
+        ArrayList<String> storedFiles = new ArrayList<String>();
         //对于不压缩的要update回去
         for (String name : compressData.keySet()) {
             File file = new File(m7zipOutPutDir.getAbsolutePath(), name);
